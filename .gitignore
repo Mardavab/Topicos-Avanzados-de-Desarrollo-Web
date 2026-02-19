@@ -1,0 +1,19 @@
+# Docker
+.env
+db_data/
+
+# Dependencias
+/vendor/
+
+# Logs
+*.log
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Node (si luego agregas frontend)
+node_modules/
