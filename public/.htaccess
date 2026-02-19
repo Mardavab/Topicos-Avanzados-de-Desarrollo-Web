@@ -1,0 +1,8 @@
+RewriteEngine On
+
+# Si el archivo o carpeta existe, lo sirve normalmente
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Todo lo demás va a index.php
+RewriteRule ^ index.php [QSA,L]
