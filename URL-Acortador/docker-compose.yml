@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+
+  # ── PHP + Apache ──────────────────────────────────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: urlshortener_app
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      DB_HOST:     db
+      DB_PORT:     3306
+      DB_NAME:     urlshortener
+      DB_USER:     shortener
+      DB_PASS:     secret
+      BASE_URL:    http://localhost:8080
+      APP_HOST:    localhost
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── MySQL ─────────────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: urlshortener_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE:      urlshortener
+      MYSQL_USER:          shortener
+      MYSQL_PASSWORD:      secret
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "shortener", "-psecret"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ── phpMyAdmin (opcional, para ver la BD en el navegador) ─────────────────
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: urlshortener_pma
+    restart: unless-stopped
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST:     db
+      PMA_USER:     shortener
+      PMA_PASSWORD: secret
+
+volumes:
+  db_data:
